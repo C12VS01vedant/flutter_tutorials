@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
+import 'read_data_screen.dart'; // New screen for reading data
 
 void main() => runApp(MyApp());
 
@@ -24,90 +25,48 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2, // Number of tabs
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('CRUD Flutter App'),
-          bottom: TabBar(
-            tabs: [
-              Tab(text: 'Manage Data'),
-              Tab(text: 'View Data'),
-            ],
-          ),
-        ),
-        body: TabBarView(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('CRUD Flutter App'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildManageDataTab(),
-            _buildViewDataTab(),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+            TextField(
+              controller: _descriptionController,
+              decoration: InputDecoration(labelText: 'Description'),
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _addItem(),
+                  child: Text('Add'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _readItems(context),
+                  child: Text('Read'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _updateItem(),
+                  child: Text('Update'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _deleteItem(),
+                  child: Text('Delete'),
+                ),
+              ],
+            ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildManageDataTab() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: InputDecoration(labelText: 'Name'),
-          ),
-          TextField(
-            controller: _descriptionController,
-            decoration: InputDecoration(labelText: 'Description'),
-          ),
-          SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () => _addItem(),
-                child: Text('Add'),
-              ),
-              ElevatedButton(
-                onPressed: () => _readItems(),
-                child: Text('Read'),
-              ),
-              ElevatedButton(
-                onPressed: () => _updateItem(),
-                child: Text('Update'),
-              ),
-              ElevatedButton(
-                onPressed: () => _deleteItem(),
-                child: Text('Delete'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildViewDataTab() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _dbHelper.getAllItems(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else {
-          List<Map<String, dynamic>> data = snapshot.data!;
-          return ListView.builder(
-            itemCount: data.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(data[index]['name']),
-                subtitle: Text(data[index]['description']),
-              );
-            },
-          );
-        }
-      },
     );
   }
 
@@ -120,10 +79,11 @@ class _HomePageState extends State<HomePage> {
     _clearControllers();
   }
 
-  void _readItems() async {
-    List<Map<String, dynamic>> rows = await _dbHelper.getAllItems();
-    // Handle and display the fetched items as needed
-    print(rows);
+  void _readItems(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ReadDataScreen()),
+    );
   }
 
   void _updateItem() async {
